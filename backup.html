@@ -1,0 +1,188 @@
+<!doctype html>
+
+<html>
+    <head>
+        <!-- jQuery Library -->
+        <script src = "https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+        integrity = "sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
+        crossorigin = "anonymous">
+        </script>
+
+        <!-- Popper -->
+        <script src = "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+        integrity = "sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" 
+        crossorigin = "anonymous">
+        </script>
+
+        <!-- Compiled and Minified Bootstrap JavaScript -->
+        <script src = "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
+        integrity = "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" 
+        crossorigin = "anonymous">
+        </script>
+        <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.2/angular.min.js"></script>
+
+        <!-- Compiled and Minified Bootstrap CSS -->
+        <link rel = "stylesheet" 
+        href = "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity = "sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" 
+        crossorigin = "anonymous">
+    </head>
+    <style>
+        body{
+             margin-top: 20px;
+        }
+        .banner_holder{
+            width: 100%;
+            height: 300px;
+            min-height: 200px;
+            position: relative;
+            /* outline:1px dotted red; */
+        }
+
+        .banner_holder img{
+            width: 100%;
+        }
+
+    </style>
+
+    
+
+    <title>IBM watson ML</title>
+
+    <body>
+        
+        <div ng-app="fileUpload" class="">
+                <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-sm-6 ">
+                              <div >
+                                <h1 style="font-family: 'Shadows Into Light', cursive; padding-bottom: 3%;">Sex and Age 8stmtr</h1>
+                                    <input class="btn btn-info" type="file" fileinput="file" filepreview="filepreview"/>
+                                    <hr>
+                                    <div class="card">
+                                        <div class="card-body"><h1>Basic card</h1></div>
+                                        <hr>
+                                        <div>
+                                            <div>
+                                            <span>Gender : Male</span>
+                                            </div>
+                                            <hr>
+                                            <div>
+                                            <span>Estimated age : 28</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                              </div>
+                                
+                          </div>
+                          <div class="col-sm-6 banner_holder">
+                                <img ng-src="{{filepreview}}" class="img-responsive" ng-show="filepreview"/>
+                          </div>
+                        </div>
+                      </div>
+            <!-- <div class="row" ng-controller="upload">
+              <div class="col-md-6">
+                  <input type="file" fileinput="file" filepreview="filepreview"/>
+              </div>
+              <div class="col-md-6">
+                 <img ng-src="{{filepreview}}" class="img-responsive" ng-show="filepreview"/>
+              </div>
+              
+             
+            </div> -->
+          </div>
+    </body>
+
+    <script>
+    console.clear();
+angular.module('fileUpload', [])
+  .controller("upload", ['$scope', '$http', 'uploadService', function($scope, $http, uploadService) {
+    $scope.$watch('file', function(newfile, oldfile) {
+      if(angular.equals(newfile, oldfile) ){
+        return;
+      }
+
+      uploadService.upload(newfile).then(function(res){
+        // DO SOMETHING WITH THE RESULT!
+        console.log("result", res);
+      })
+    });
+
+  }])
+  .service("uploadService", function($http, $q) {
+
+    return ({
+      upload: upload
+    });
+
+    function upload(file) {
+        console.log('level one')
+      var upl = $http({
+        method: 'POST',
+        url: 'http://localhost:8080/uploadFile', // /api/upload
+        headers: {
+        //   'Content-Type': 'multipart/form-data'
+        'Content-Type': undefined
+        },
+        data: {
+          file: file,
+        },
+        transformRequest: function(data, headersGetter) {
+          var formData = new FormData();
+          angular.forEach(data, function(value, key) {
+            formData.append(key, value);
+          });
+          console.log('level two', formData)
+
+        //   var headers = headersGetter();
+        //   delete headers['Content-Type'];
+
+          return formData;
+        }
+      });
+      return upl.then(handleSuccess, handleError);
+
+    } // End upload function
+
+    // ---
+    // PRIVATE METHODS.
+    // ---
+  
+    function handleError(response, data) {
+      if (!angular.isObject(response.data) ||!response.data.message) {
+        return ($q.reject("An unknown error occurred."));
+      }
+
+      return ($q.reject(response.data.message));
+    }
+
+    function handleSuccess(response) {
+        console.log('good response from server', response.data);
+      return (response.data);
+    }
+
+  })
+  .directive("fileinput", [function() {
+    return {
+      scope: {
+        fileinput: "=",
+        filepreview: "="
+      },
+      link: function(scope, element, attributes) {
+        element.bind("change", function(changeEvent) {
+          scope.fileinput = changeEvent.target.files[0];
+          var reader = new FileReader();
+          reader.onload = function(loadEvent) {
+            scope.$apply(function() {
+              scope.filepreview = loadEvent.target.result;
+            });
+          }
+          reader.readAsDataURL(scope.fileinput);
+        });
+      }
+    }
+  }]);
+  </script>
+</html>
+
+  

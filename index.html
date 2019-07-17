@@ -62,25 +62,25 @@
 
                       <hr>
                     <div class="card">
-                        <div class="card-body">
+                        <div ng-show="rec.msg === 'success'" class="card-body">
                             <!-- <div ng-hide="load === false"> -->
                             <div class="spinner-grow" role="status">
                                 <span class="sr-only">Loading, Please wait ...</span>
                             </div>
                         <!-- </div> -->
                                       
-                                      <h1>{{rec}}</h1></div>
+                                      <h1>Success</h1></div>
                         <hr>
                         <div>
                             <div>
-                            <span>Gender : Male</span>
+                            <span>Gender : {{rec.gender_label}}</span>
                             <div class="spinner-border m-5" role="status">
                                     <span class="sr-only">Loading...</span>
                                   </div>
                             </div>
                             <hr>
                             <div>
-                            <span>Estimated age : 28</span>
+                            <span>Estimated age : Minimum {{rec.min-age}} -> Maximum Age {{rec.max_age}}</span>
                             </div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ angular.module('fileUpload', [])
 
         $http({
                 method : 'GET',
-                url : 'http://localhost:8080/recog?filename='+res.data.fileName
+                url : 'http://localhost:8080/recog?incomingFileName='+res.data.fileName
             }).then(function mySuccess(response) {
                 $scope.rec = response.data;
                 }, function myError(response) {
